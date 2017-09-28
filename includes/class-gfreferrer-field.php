@@ -26,43 +26,39 @@ class GF_Referrer_Field extends GF_Field_Hidden {
   }
 
   /**
-   * The settings which should be available on the field in the form editor.
+   * The settings that should be available on the field in the form editor.
    *
    * @return array
    */
   function get_form_editor_field_settings() {
 		return array(
       'label_setting',
-      'prepopulate_field_setting'
 		);
 	}
 
   /**
-	 * Set the scripts to be included in the form editor.
-	 *
-	 * @return string
-	 */
-	public function get_form_editor_inline_script_on_page_render() {
-		// set the default field label for the simple type field
-		$script = sprintf( "function SetDefaultValues_%s(field) {" .
-      "field.label = '%s'," .
-      "field.allowsPrepopulate = true," .
-      "field.inputName = 'gfreferrer';" .
-      //"defaultValue = '"++"'" .
-      "}", $this->type, $this->get_form_editor_field_title() ) . PHP_EOL;
-      $script .= sprintf( "jQuery(document).bind( 'gform_load_field_settings', function( event, field, form ) {" .
-    // $script .= sprintf( "jQuery(document).bind( 'gform_load_field_settings', function( event, field, form ) {" .
-      //TODO: Make this selector work - event runs BEFORE fields are in DOM
-      //TODO: Make sure this only applies to the custom field
-        "console.log('opened:'+field.id);" .
-        "var fieldSelector = '#field_' + field.id;" .
-        "console.log(fieldSelector + ' input#field_prepopulate');" .
-        "console.log(jQuery(fieldSelector + ' input#field_prepopulate'));" .
-        "jQuery(fieldSelector + ' input#field_prepopulate').prop('disabled',true);" .
-         "});") . PHP_EOL;
-		return $script;
-	}
-  
+  * Override the get_value_save_entry function to set the custom field entry value
+  *
+  */
+  public function get_value_save_entry( $value, $form, $input_name, $lead_id, $lead ) {
+    if (isset($_SESSION['gf_referral_source']) && !empty($_SESSION['gf_referral_source'])) {
+      $referral_source = $_SESSION['gf_referral_source'];
+      return $_SESSION['gf_referral_source'];
+    } else {
+      return '';
+    }
+  }
+
+  public function get_field_label( $force_frontend_label, $value ) {
+    error_log('current label value:'.$this->label);
+    if (!empty($this->label) && $this->label != 'Untitled') {
+      return $this->label;
+    }
+    $field_title = $this->get_form_editor_field_title();
+    $this->label = $field_title;
+    return $field_title ? $field_title : GFCommon::get_label( $this );
+  }
+
 }
 
 GF_Fields::register( new GF_Referrer_Field() );
