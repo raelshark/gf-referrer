@@ -1,6 +1,12 @@
 # GF-Referrer
 
-A WordPress plugin that adds a custom Gravity Forms field to capture the user's referrer URL
+A WordPress plugin that adds a custom Gravity Forms field to capture the user's referrer URL.
+
+## Purpose
+
+Gravity Forms contains a {referer} merge tag that can be added to a Hidden field to dynamically populate the referrer, but their merge tag uses the information provider by your server in the http_referer header which only reports the last URL the user visited before submitting the form. If your user navigated through your site before filling out the form the referrer URL would just be the previous page on your site. That's not very useful if your goal is to determine how the user found your site in the first place.
+
+This WordPress plugin allows you to populate your form entry with the URL that referred the user to your site so you can easily see if they came from a search engine such as Google, an ad from something like Google AdWords, social media, and so on.
 
 ## Installation
 
@@ -15,9 +21,7 @@ A WordPress plugin that adds a custom Gravity Forms field to capture the user's 
 ![screenshot 2017-09-29 05 09 11](https://user-images.githubusercontent.com/1673734/31009139-7756cb54-a4d4-11e7-84cc-4af45c11a11d.png)
 
 
-When a user visits your site, a session value containing their HTTP referrer header value will be created. Then when the user submits the form containing this custom field on your site, the custom field will be populated with that setting. By keeping the referrer value in the user's session, the plugin ensures only the original referring URL is saved, then remembered as the user navigates through the site until they submit the form.
-
-
+When a user visits your site, a session value containing their HTTP referrer header value will be created. Then, when the user submits the form containing this custom field on your site, the custom field will be populated with that setting. By keeping the referrer value in the user's session, the plugin ensures only the original referring URL is saved, then remembered as the user navigates through the site until they submit the form.
 
 ## Technical Notes:
 
