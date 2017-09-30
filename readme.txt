@@ -4,6 +4,7 @@ Tags: gravity-forms, referer, referrer
 Requires at least: 4.7
 Tested up to: 4.8
 Stable tag: 1.0.1
+Requires PHP: 5.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,3 +31,7 @@ Questions? Comments? Want to contribute? Please feel free to discuss on [Github]
 4. If you want, customize the label for the field, then Update the form.
 
 When a user visits your site, a session value containing their HTTP referrer header value will be created. Then, when the user submits the form containing this custom field on your site, the custom field will be populated with that setting. By keeping the referrer value in the user's session, the plugin ensures only the original referring URL is saved, then remembered as the user navigates through the site until they submit the form.
+
+== Changelog ==
+
+1.0.1 - Initial release
