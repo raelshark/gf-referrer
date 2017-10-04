@@ -41,16 +41,24 @@ class GF_Referrer_Field extends GF_Field_Hidden {
   *
   */
   public function get_value_save_entry( $value, $form, $input_name, $lead_id, $lead ) {
-    if (isset($_SESSION['gf_referral_source']) && !empty($_SESSION['gf_referral_source'])) {
-      $referral_source = $_SESSION['gf_referral_source'];
-      return $_SESSION['gf_referral_source'];
+    // if (isset($_SESSION['gf_referral_source']) && !empty($_SESSION['gf_referral_source'])) {
+    //   $referral_source = $_SESSION['gf_referral_source'];
+    //   return $_SESSION['gf_referral_source'];
+    // } else {
+    //   return '';
+    // }
+
+    error_log('---------------------------------------');
+    error_log("Cookie ".REFERRER_COOKIE_NAME." is set: ". var_export(isset($_COOKIE[REFERRER_COOKIE_NAME]), true));
+    if (isset($_COOKIE[REFERRER_COOKIE_NAME])) {
+      $referrer_cookie_name = $_COOKIE[REFERRER_COOKIE_NAME];
+      return $referrer_cookie_name;
     } else {
       return '';
     }
   }
 
   public function get_field_label( $force_frontend_label, $value ) {
-    error_log('current label value:'.$this->label);
     if (!empty($this->label) && $this->label != 'Untitled') {
       return $this->label;
     }
