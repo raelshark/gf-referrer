@@ -10,86 +10,71 @@ License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 define( 'GF_REFERRER_ADDON_VERSION', '1.0' );
 define( 'REFERRER_COOKIE_NAME', 'referrer_url');
 
-// add_action('init', 'start_session', 1);
-// function start_session() {
-//   if(!session_id()) {
-//     session_start();
-//   }
-// }
-
-// add_action('wp_logout', 'end_session');
-// add_action('wp_login', 'end_session');
-// add_action('end_session_action', 'end_session');
-// function end_session() {
-//   session_destroy();
-// }
-
 function get_referrer() {
-  $referrer_url = "";
+  $referrer_url = '';
   if (!empty($_SERVER['HTTP_REFERER'])) {
-    error_log("HTTP_REFERER found.");
+    error_log('HTTP_REFERER found.');
     $referrer_url = $_SERVER['HTTP_REFERER'];
   } else if(!empty($_SERVER['X-FORWARDED-FOR'])){
-    error_log("X-FORWARDED-FOR found.");
+    error_log('X-FORWARDED-FOR found.');
     $referrer_url = $_SERVER['X-FORWARDED-FOR'];
   } else {
-    error_log("No HTTP referrer found");
+    error_log('No HTTP referrer found');
+    error_log('HTTP Headers: ');
+    error_log(wp_json_encode(getallheaders()));
   }
   return $referrer_url;
 }
 
-// add_action('init', 'gfreferrer_set_referrer', 1);
-// function gfreferrer_set_referrer() {
-//   if (!isset($_SESSION['gf_referral_source']) || empty($_SESSION['gf_referral_source'])) {
-//     error_log("No referrer session value found. Checking HTTP referrers.");
-//     $referrer_url = get_referrer();
-//
-//     error_log("Referrer variable set: ".$referrer_url);
-//
-//     $referrer_host = parse_url($referrer_url, PHP_URL_HOST);
-//     $current_host = $_SERVER['HTTP_HOST'];
-//     error_log("Current host: ".$current_host);
-//
-//     if(!empty($referrer_url) && !strpos(strtolower($referrer_host), strtolower($current_host))) {
-//       error_log("Value set to session: ".$referrer_url);
-//       $_SESSION['gf_referral_source'] = $referrer_url;
-//     } else {
-//       error_log("Referrer variable empty or hosts are the same");
-//     }
-//   }
-// }
-
 add_action( 'init', 'set_referrer_cookie' );
 function set_referrer_cookie() {
 
-  if (wp_doing_ajax() || is_admin()) {
+  //exclude AJAX calls and admin pages
+  if (wp_doing_ajax() || is_admin() || strpos($_SERVER['REQUEST_URI'],'wp-content') !== false) {
     return;
   }
 
-  error_log('---------------------------------------');
+  error_log('Setting cookie --------------------------');
+
+  $current_url =  "{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+  error_log('Current URL: '.$current_url);
+
   if (empty($_COOKIE[REFERRER_COOKIE_NAME])) {
-    error_log('cookie is not set');
-    error_log("No referrer session value found. Checking HTTP referrers.");
+
+    error_log("No referrer cookie value found. Checking HTTP referrers.");
     $referrer_url = get_referrer();
 
-    error_log("Referrer variable set: ".$referrer_url);
+    if(!empty($referrer_url)) {
 
-    $url_parts = parse_url($referrer_url);
-    $referrer_host = $url_parts['host'] . (!empty($url_parts['port']) ? ':'.$url_parts['port'] : '');
-    $current_host = $_SERVER['HTTP_HOST'];
+      error_log("Referrer found: ".$referrer_url);
 
-    error_log("is current host: ". var_export(strtolower($referrer_host) === strtolower($current_host), true));
-    error_log("is localhost: ". var_export(strtolower($url_parts['host']) === 'localhost', true));
-    error_log("isadmin: ". var_export(is_admin(), true));
+      $url_parts = parse_url($referrer_url);
+      $referrer_host = $url_parts['host'] . (!empty($url_parts['port']) ? ':'.$url_parts['port'] : '');
+      $current_host = $_SERVER['HTTP_HOST'];
 
-    if(!empty($referrer_url)
-      && strtolower($referrer_host) !== strtolower($current_host)
-      && strtolower($url_parts['host']) !== 'localhost'
-      ) {
-      error_log("Setting value to cookie: ".$referrer_url);
-      setcookie( REFERRER_COOKIE_NAME, $referrer_url, time() + 30 * DAY_IN_SECONDS, "/", null );
+      //exclude cron job calls
+      if (strtolower($url_parts['path']) === 'wp-cron.php') {
+        error_log("Cookie not set: Cron job request");
+        return;
+      }
+
+      error_log("is current host: ". var_export(strtolower($referrer_host) === strtolower($current_host), true));
+      error_log("is localhost: ". var_export(strtolower($url_parts['host']) === 'localhost', true));
+      error_log("is admin: ". var_export(is_admin(), true));
+      error_log("is empty: ". var_export(empty($referrer_url), true));
+
+      if (strtolower($referrer_host) !== strtolower($current_host)) {
+        if (strtolower($url_parts['host']) !== 'localhost') {
+          error_log("Setting value to cookie: ".$referrer_url);
+          setcookie( REFERRER_COOKIE_NAME, $referrer_url, time() + 30 * DAY_IN_SECONDS, "/", null );
+        } else {
+          error_log("Cookie not set: Request is from localhost");
+        }
+      } else {
+        error_log("Cookie not set: Request is from the current host");
+      }
     } else {
-      error_log("Skipping cookie: In admin section, referrer value is empty, or referrer is from the current host");
+      error_log("Cookie not set: Referrer value is empty");
     }
   }
 

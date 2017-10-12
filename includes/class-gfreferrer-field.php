@@ -41,20 +41,15 @@ class GF_Referrer_Field extends GF_Field_Hidden {
   *
   */
   public function get_value_save_entry( $value, $form, $input_name, $lead_id, $lead ) {
-    // if (isset($_SESSION['gf_referral_source']) && !empty($_SESSION['gf_referral_source'])) {
-    //   $referral_source = $_SESSION['gf_referral_source'];
-    //   return $_SESSION['gf_referral_source'];
-    // } else {
-    //   return '';
-    // }
-
-    error_log('---------------------------------------');
+    error_log('Reading cookie --------------------------');
+    $current_url =  "{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+    error_log('Current URL: '.$current_url);
     error_log("Cookie ".REFERRER_COOKIE_NAME." is set: ". var_export(isset($_COOKIE[REFERRER_COOKIE_NAME]), true));
     if (isset($_COOKIE[REFERRER_COOKIE_NAME])) {
-      $referrer_cookie_name = $_COOKIE[REFERRER_COOKIE_NAME];
-      return $referrer_cookie_name;
+      $referrer = $_COOKIE[REFERRER_COOKIE_NAME];
+      return $referrer;
     } else {
-      return '';
+      return 'Unknown';
     }
   }
 
